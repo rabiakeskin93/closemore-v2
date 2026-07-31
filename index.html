@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CloseMore.ai - AI B2B Sales Assistant</title>
+<style>
+* {
+box-sizing: border-box;
+margin: 0;
+padding: 0;
+font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+body {
+background-color: #0f172a;
+color: #f8fafc;
+display: flex;
+justify-content: center;
+align-items: center;
+min-height: 100vh;
+padding: 20px;
+}
+.container {
+background-color: #1e293b;
+width: 100%;
+max-width: 650px;
+padding: 30px;
+border-radius: 16px;
+box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+border: 1px solid #334155;
+}
+h1 {
+font-size: 26px;
+color: #38bdf8;
+margin-bottom: 6px;
+text-align: center;
+}
+p.subtitle {
+text-align: center;
+color: #94a3b8;
+font-size: 14px;
+margin-bottom: 24px;
+}
+.form-group {
+margin-bottom: 18px;
+}
+label {
+display: block;
+font-size: 13px;
+font-weight: 600;
+margin-bottom: 6px;
+color: #cbd5e1;
+}
+textarea, select {
+width: 100%;
+padding: 12px;
+background-color: #0f172a;
+border: 1px solid #334155;
+border-radius: 8px;
+color: #fff;
+font-size: 14px;
+resize: vertical;
+}
+textarea:focus, select:focus {
+outline: none;
+border-color: #38bdf8;
+}
+.row {
+display: flex;
+gap: 12px;
+}
+.row .form-group {
+flex: 1;
+}
+button.btn-submit {
+width: 100%;
+padding: 14px;
+background: linear-gradient(135deg, #2563eb, #0284c7);
+color: white;
+border: none;
+border-radius: 8px;
+font-size: 15px;
+font-weight: bold;
+cursor: pointer;
+transition: all 0.2s;
+margin-top: 10px;
+}
+button.btn-submit:hover {
+opacity: 0.9;
+transform: translateY(-1px);
+}
+.result-box {
+margin-top: 24px;
+padding: 18px;
+background-color: #0f172a;
+border-radius: 8px;
+border: 1px solid #334155;
+display: none;
+}
+.result-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 12px;
+}
+.result-title {
+font-size: 12px;
+font-weight: bold;
+color: #38bdf8;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+}
+.btn-copy {
+background-color: #334155;
+color: #f8fafc;
+border: none;
+padding: 6px 12px;
+border-radius: 6px;
+font-size: 12px;
+cursor: pointer;
+transition: 0.2s;
+}
+.btn-copy:hover {
+background-color: #475569;
+}
+.result-content {
+font-size: 14px;
+line-height: 1.6;
+color: #e2e8f0;
+white-space: pre-wrap;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+<h1>CloseMore.ai</h1>
+<p class="subtitle">AI-Powered B2B Sales & Closing Assistant</p>
+
+<div class="form-group">
+<label for="companyInfo">Company / Product Memory & Offer Details:</label>
+<textarea id="companyInfo" rows="3" placeholder="e.g. We sell enterprise CRM software for $200/mo. Key value: 24/7 dedicated support, free onboarding, and guaranteed 30% ROI within 60 days."></textarea>
+</div>
+
+<div class="form-group">
+<label for="customerMessage">Customer Objection / Message:</label>
+<textarea id="customerMessage" rows="3" placeholder="e.g. Your price is higher than Competitor X. Why should we choose you?"></textarea>
+</div>
+
+<div class="row">
+<div class="form-group">
+<label for="tone">Response Strategy / Tone:</label>
+<select id="tone">
+<option value="Persuasive & Value-Driven">Persuasive & Value-Driven</option>
+<option value="Executive & Professional">Executive & Professional</option>
+<option value="Urgency & Deal Closing">Urgency & Deal Closing</option>
+<option value="Consultative & Problem Solving">Consultative & Problem Solving</option>
+</select>
+</div>
+
+<div class="form-group">
+<label for="language">Output Language:</label>
+<select id="language">
+<option value="English">English 🇺🇸</option>
+<option value="Turkish">Turkish 🇹🇷</option>
+<option value="German">German 🇩🇪</option>
+<option value="Spanish">Spanish 🇪🇸</option>
+</select>
+</div>
+</div>
+
+<button class="btn-submit" onclick="generateReply()">Generate Sales Reply ✨</button>
+
+<div class="result-box" id="resultBox">
+<div class="result-header">
+<span class="result-title">Suggested Sales Response</span>
+<button class="btn-copy" onclick="copyReply()" id="copyBtn">Copy 📋</button>
+</div>
+<div class="result-content" id="replyText"></div>
+</div>
+</div>
+
+<script>
+async function generateReply() {
+const companyInfo = document.getElementById('companyInfo').value;
+const customerMessage = document.getElementById('customerMessage').value;
+const tone = document.getElementById('tone').value;
+const language = document.getElementById('language').value;
+const resultBox = document.getElementById('resultBox');
+const replyText = document.getElementById('replyText');
+
+if (!customerMessage) {
+alert('Please enter a customer message or objection.');
+return;
+}
+
+replyText.innerText = 'AI is crafting your high-converting reply...';
+resultBox.style.display = 'block';
+
+try {
+const response = await fetch('/api/generate-reply', {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({ companyInfo, customerMessage, tone, language })
+});
+
+const data = await response.json();
+
+if (data.success) {
+replyText.innerText = data.reply;
+} else {
+replyText.innerText = 'Error: ' + (data.error || 'Failed to generate response.');
+}
+} catch (err) {
+replyText.innerText = 'Could not connect to server. Make sure server.js is running.';
+}
+}
+
+function copyReply() {
+const text = document.getElementById('replyText').innerText;
+navigator.clipboard.writeText(text).then(() => {
+const copyBtn = document.getElementById('copyBtn');
+copyBtn.innerText = 'Copied! ✅';
+setTimeout(() => { copyBtn.innerText = 'Copy 📋'; }, 2000);
+});
+}
+</script>
+</body>
+</html>
